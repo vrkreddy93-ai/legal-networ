@@ -8,3 +8,18 @@ main{padding-top:28px}.page-kicker{display:flex;justify-content:space-between;al
 @media(max-width:780px){.shell{padding:0 18px 35px}.workspace{grid-template-columns:1fr}.rail{grid-template-columns:1fr 1fr}.policy-note{grid-column:1/-1}.hero{align-items:flex-start;flex-direction:column}.steps{align-self:flex-start}.page-kicker{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:520px){.server-state em{display:none}.assessment{padding:17px}.rail{grid-template-columns:1fr}.options{grid-template-columns:1fr}.compare-controls{align-items:stretch;flex-direction:column}.compare-arrow{display:none}.history-row{grid-template-columns:1fr auto}.history-meta{grid-column:1}.history-risk{grid-column:2;grid-row:1}.history-row button{justify-self:start}.summary-grid{grid-template-columns:repeat(2,1fr)}.results,.history{padding:16px}footer{flex-direction:column}.actions{flex-wrap:wrap}}
 .history-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .stop-dashboard{border:1px solid #e6dfe0;border-radius:7px;background:#fff;color:#8c6262;padding:6px 9px;font-size:8px;font-weight:700;cursor:pointer}.stop-dashboard:hover{background:#fff4f4}.stop-dashboard:focus-visible{outline:3px solid #8da4ff;outline-offset:2px}
+
+/* App-like local dashboard polish */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(245,247,251,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.brand-mark{position:relative;overflow:hidden;background:linear-gradient(145deg,#1b2a46 0%,#101b30 100%);box-shadow:0 5px 14px #17243b25}
+.brand-mark:after{content:"";position:absolute;inset:1px;border:1px solid #ffffff26;border-radius:11px;pointer-events:none}
+.card{border-radius:16px;box-shadow:0 14px 42px #233a5b0d;transition:box-shadow .18s,border-color .18s}
+.card:focus-within{border-color:#cbd7ed}
+.button{min-height:38px;border-radius:10px;font-size:11px;padding:9px 14px}
+.target-field input{font-size:13px}
+.install-button{min-height:31px;border:1px solid #d7e0f2;border-radius:8px;background:#f4f7ff;color:#3d59b5;padding:6px 10px;font-size:9px;font-weight:750;cursor:pointer;white-space:nowrap}
+.install-button:hover{background:#eaf0ff;border-color:#c8d6f5}
+.install-button:focus-visible{outline:3px solid #8da4ff;outline-offset:2px}
+.install-button[hidden]{display:none}
+@media(max-width:780px){.topbar{height:68px}.card{border-radius:14px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}

@@ -4,7 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#17243b">
   <title>Aegis Guard · Security Posture</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="stylesheet" href="/app.css">
   <script src="/app.js" defer></script>
 </head>
@@ -12,7 +16,7 @@
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Aegis Guard home"><span class="brand-mark">AG</span><span>Aegis <b>Guard</b><small>SECURITY POSTURE</small></span></a>
-      <div class="server-state"><i></i><span>LOCAL DASHBOARD</span><em id="allowlist-state">Checking asset policy…</em><button class="stop-dashboard" id="stop-dashboard" type="button">Stop</button></div>
+      <div class="server-state"><i></i><span>LOCAL DASHBOARD</span><em id="allowlist-state">Checking asset policy…</em><button class="install-button" id="install-app" type="button" hidden>Install app</button><button class="stop-dashboard" id="stop-dashboard" type="button">Stop</button></div>
     </header>
 
     <main id="top">

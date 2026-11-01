@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Aegis Guard</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#24395f"/>
+      <stop offset="1" stop-color="#101b30"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#88a3ff"/>
+      <stop offset="1" stop-color="#4765e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M256 69 390 120v112c0 97-54 164-134 211-80-47-134-114-134-211V120z" fill="url(#shield)"/>
+  <path d="M256 103 359 142v90c0 74-38 127-103 168-65-41-103-94-103-168v-90z" fill="#17243b" opacity=".94"/>
+  <path d="m207 250 33 33 68-74" fill="none" stroke="#dce6ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="23"/>
+  <circle cx="256" cy="357" r="12" fill="#88a3ff"/>
+</svg>

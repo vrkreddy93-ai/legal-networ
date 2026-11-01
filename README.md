@@ -1,4 +1,4 @@
-# Aegis Guard 0.4.0
+# Aegis Guard 0.5.0
 
 Aegis Guard is a local-first, low-impact security posture scanner for a single host you own or are explicitly authorized to assess. It includes a command-line interface and a local web dashboard.
 
@@ -18,6 +18,8 @@ python -m aegis serve
 ```
 
 The dashboard opens at [http://127.0.0.1:8765](http://127.0.0.1:8765). It binds to loopback for one local operator and is not designed to be exposed to the public internet. GitHub Pages cannot run this Python backend.
+
+In a supported browser, choose **Install app** in the dashboard or use the browser's install menu. The installed window still requires the local Aegis Guard server to be running; start it with `python -m aegis serve` or the Windows launcher before opening the installed app. There is no offline scan mode.
 
 On Windows, you can launch the desktop interface with:
 

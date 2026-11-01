@@ -37,4 +37,25 @@ async function stopDashboard(){
 }
 document.querySelector("#stop-dashboard").addEventListener("click",stopDashboard);
 
+let deferredInstallPrompt=null;
+const installAppButton=document.querySelector("#install-app");
+window.addEventListener("beforeinstallprompt",event=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  installAppButton.hidden=false;
+});
+installAppButton.addEventListener("click",async()=>{
+  if(!deferredInstallPrompt)return;
+  installAppButton.disabled=true;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt=null;
+  installAppButton.disabled=false;
+  installAppButton.hidden=true;
+});
+window.addEventListener("appinstalled",()=>{
+  deferredInstallPrompt=null;
+  installAppButton.hidden=true;
+});
+
 

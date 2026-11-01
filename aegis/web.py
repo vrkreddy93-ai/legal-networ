@@ -168,6 +168,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
         assets = {
             "/app.css": ("app.css", "text/css; charset=utf-8"),
             "/app.js": ("app.js", "application/javascript; charset=utf-8"),
+            "/manifest.webmanifest": ("manifest.webmanifest", "application/manifest+json; charset=utf-8"),
+            "/icon.svg": ("icon.svg", "image/svg+xml; charset=utf-8"),
+            "/icon-192.png": ("icon-192.png", "image/png"),
+            "/icon-512.png": ("icon-512.png", "image/png"),
         }
         if path == "/health":
             self._send_json(HTTPStatus.OK, {"status": "ok"})
