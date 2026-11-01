@@ -1,0 +1,72 @@
+﻿<!doctype html>
+<html lang="en" data-token="__AEGIS_TOKEN__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Aegis Guard · Security Posture</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Aegis Guard home"><span class="brand-mark">AG</span><span>Aegis <b>Guard</b><small>SECURITY POSTURE</small></span></a>
+      <div class="server-state"><i></i><span>LOCAL DASHBOARD</span><em id="allowlist-state">Checking asset policy…</em><button class="stop-dashboard" id="stop-dashboard" type="button">Stop</button></div>
+    </header>
+
+    <main id="top">
+      <div class="page-kicker"><span>ASSESSMENT WORKSPACE</span><span class="local-pill">127.0.0.1 · private to this computer</span></div>
+      <section class="hero">
+        <div><p class="eyebrow">AUTHORIZED · LOW IMPACT</p><h1>Understand your exposed surface.</h1><p class="lede">Choose one host, preview the exact scope, then run bounded posture checks and review evidence you can act on.</p></div>
+        <div class="steps" aria-label="Workflow"><span class="current"><i>1</i> Scope</span><b>→</b><span><i>2</i> Preview</span><b>→</b><span><i>3</i> Review</span></div>
+      </section>
+
+      <div class="workspace">
+        <section class="card assessment" aria-labelledby="assessment-title">
+          <div class="card-heading"><span class="heading-icon">01</span><div><h2 id="assessment-title">Assessment scope</h2><p>One hostname or IP address per run.</p></div></div>
+          <form id="scan-form" novalidate>
+            <label for="target">Target <span class="required">REQUIRED</span></label>
+            <div class="target-field"><span aria-hidden="true">↗</span><input id="target" name="target" autocomplete="url" placeholder="https://your-authorized-host.example" maxlength="253" required aria-describedby="target-help"><span class="protocol">HTTP · HTTPS</span></div>
+            <p class="help" id="target-help">Root URL or single host only. No paths, credentials, wildcards, CIDRs, or ranges.</p>
+            <label class="consent"><input id="authorized" name="authorized" type="checkbox" required><span><strong>Authorization confirmed</strong><small>I own this target or have written permission to assess it.</small></span></label>
+            <details class="advanced"><summary>Advanced options</summary><div class="options">
+              <label>Authorization reference<input id="authorization-reference" name="authorization_reference" placeholder="Ticket or approved asset ID" maxlength="512"></label>
+              <label>TCP ports<input id="ports" name="ports" value="22,80,443,445,3389,3306,5432,6379,8080,8443,27017" maxlength="512" aria-describedby="ports-help"><small id="ports-help">Comma-separated · up to 64 valid ports</small></label>
+              <label>Timeout (seconds)<input id="timeout" name="timeout" type="number" min="0.2" max="10" step="0.1" value="1.5"></label>
+              <label>Report format<select id="format" name="format"><option value="both">JSON and Markdown</option><option value="json">JSON</option><option value="markdown">Markdown</option></select></label>
+            </div></details>
+            <div class="actions"><button class="button button-muted" id="preview" type="button">Preview checks</button><button class="button button-primary" id="run-scan" type="submit">Run safe scan <span aria-hidden="true">→</span></button><button class="button button-danger" id="cancel-scan" type="button" hidden>Cancel scan</button></div>
+          </form>
+          <div id="form-message" class="notice" role="status" aria-live="polite">Preview validates scope without sending network traffic.</div>
+        </section>
+
+        <aside class="rail">
+          <section class="card planned" aria-labelledby="planned-title"><div class="rail-heading"><h2 id="planned-title">Included checks</h2><span class="badge">BOUNDED</span></div>
+            <ul class="check-list"><li><i>01</i><span><b>DNS resolution</b><small>Resolve once; pin chosen address</small></span></li><li><i>02</i><span><b>TCP exposure</b><small>One connect attempt per selected port</small></span></li><li><i>03</i><span><b>TLS verification</b><small>Certificate and expiry checks</small></span></li><li><i>04</i><span><b>Web headers</b><small>At most one HEAD request</small></span></li><li><i>05</i><span><b>Risk correlation</b><small>Explainable local rules</small></span></li></ul>
+          </section>
+          <section class="safety"><b><span>✓</span> Safety boundaries</b><p>No logins, payloads, brute force, load generation, or exploit attempts. Checks remain limited to this host and the selected ports.</p></section>
+          <section class="policy-note" id="policy-note">Target authorization is an explicit declaration. Configure <code>AEGIS_ALLOWED_TARGETS</code> to restrict this installation to approved hosts.</section>
+        </aside>
+      </div>
+
+      <section class="card results" aria-labelledby="results-title">
+        <div class="results-head"><div><p class="eyebrow">ASSESSMENT OUTPUT</p><h2 id="results-title">Ready when you are</h2><p id="result-subtitle">Preview first to confirm the target and planned checks.</p></div><span id="job-status" class="status-pill">READY</span></div>
+        <div id="progress-wrap" class="progress-wrap" hidden><div class="progress-track"><span id="progress-bar"></span></div><p id="progress-text" role="status" aria-live="polite">Starting…</p></div>
+        <div id="result-summary" class="summary-grid" hidden></div>
+        <div id="findings" class="findings" aria-live="polite"></div>
+        <details class="transcript-details"><summary>Technical output and limitations</summary><pre id="transcript">No scan has been run. The scanner performs low-impact observations and cannot prove that a system is secure or vulnerable.</pre><ul id="limitations" class="limitations"></ul></details>
+        <div class="result-actions"><button id="download-json" class="button button-muted" type="button" disabled>Download JSON report</button><button id="download-markdown" class="button button-muted" type="button" disabled>Download Markdown</button></div>
+      </section>
+
+      <section class="card history" aria-labelledby="history-title"><div class="history-head"><div><p class="eyebrow">LOCAL REPORT HISTORY</p><h2 id="history-title">Compare completed assessments</h2><p>Reports stay in the local reports/history folder until you clear them.</p></div><div class="history-buttons"><button id="refresh-history" class="button button-muted" type="button">Refresh</button><button id="clear-history" class="button button-danger" type="button">Clear history</button></div></div>
+        <div class="compare-controls"><label>Earlier report<select id="report-a"><option value="">Select report</option></select></label><span class="compare-arrow">→</span><label>Later report<select id="report-b"><option value="">Select report</option></select></label><button id="compare" class="button button-muted" type="button">Compare</button></div>
+        <div id="history-list" class="history-list"><p class="empty-history">Loading local report history…</p></div><div id="comparison" class="comparison" aria-live="polite"></div>
+      </section>
+      <footer><span><b>AEGIS GUARD</b> · Authorized posture assessment</span><span>Local dashboard · No third-party services</span></footer>
+    </main>
+  </div>
+</body>
+</html>
+
+
