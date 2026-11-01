@@ -9,21 +9,38 @@ def _finding(identifier: str, title: str, severity: str, category: str, evidence
     return Finding(identifier, title, severity, category, evidence, recommendation, confidence)
 
 
+def _cookie_attributes(set_cookie: str) -> set[str]:
+    """Return exact Set-Cookie attribute names, ignoring the cookie value."""
+    return {
+        segment.partition("=")[0].strip().lower()
+        for segment in set_cookie.split(";")[1:]
+        if segment.partition("=")[0].strip()
+    }
+
+
 def analyze(result: ScanResult) -> list[Finding]:
     """Create prioritized observations without claiming unobserved vulnerabilities."""
     findings: list[Finding] = []
     open_ports = {item["port"] for item in result.open_ports}
     exposed_services = {
-        445: ("SMB is reachable", "high", "Restrict SMB to private, managed networks and require current patching and signing."),
-        3389: ("Remote Desktop is reachable", "high", "Place RDP behind a VPN or zero-trust gateway, enforce MFA, and limit source IPs."),
-        3306: ("MySQL is reachable", "high", "Do not expose database listeners publicly; restrict them to application subnets and require TLS."),
-        5432: ("PostgreSQL is reachable", "high", "Do not expose database listeners publicly; restrict them to application subnets and require TLS."),
-        6379: ("Redis is reachable", "critical", "Restrict Redis to private networks immediately and require authentication and TLS."),
-        27017: ("MongoDB is reachable", "critical", "Restrict MongoDB to private networks immediately and require authentication and TLS."),
+        445: ("Possible SMB service reachable on port 445", "high", "Confirm the exposure is intended; restrict SMB to managed networks and verify patching and signing."),
+        3389: ("Possible Remote Desktop service reachable on port 3389", "high", "Confirm the exposure is intended; place remote access behind a VPN or zero-trust gateway, enforce MFA, and limit source IPs."),
+        3306: ("Possible MySQL service reachable on port 3306", "high", "Confirm the exposure is intended; restrict database access to approved application networks and verify authentication and TLS."),
+        5432: ("Possible PostgreSQL service reachable on port 5432", "high", "Confirm the exposure is intended; restrict database access to approved application networks and verify authentication and TLS."),
+        6379: ("Possible Redis service reachable on port 6379", "high", "Confirm the exposure is intended; restrict access to approved private networks and verify authentication and TLS."),
+        27017: ("Possible MongoDB service reachable on port 27017", "high", "Confirm the exposure is intended; restrict access to approved private networks and verify authentication and TLS."),
     }
     for port, (title, severity, recommendation) in exposed_services.items():
         if port in open_ports:
-            findings.append(_finding(f"network-{port}-exposure", title, severity, "network-exposure", f"A TCP connection to port {port} succeeded.", recommendation))
+            findings.append(_finding(
+                f"network-{port}-exposure",
+                title,
+                severity,
+                "network-exposure",
+                f"A TCP connection to port {port} succeeded. The service identity and its access controls were not verified.",
+                recommendation,
+                "medium",
+            ))
 
     for tls in result.tls:
         if not tls["verified"]:
@@ -55,12 +72,28 @@ def analyze(result: ScanResult) -> list[Finding]:
         cookie_headers = headers.get("set-cookie", [])
         if isinstance(cookie_headers, str):
             cookie_headers = [cookie_headers]
-        incomplete_cookies = [
-            value for value in cookie_headers
-            if "secure" not in value.lower() or "httponly" not in value.lower()
-        ]
-        if incomplete_cookies:
-            findings.append(_finding(f"http-{port}-cookie-flags", "Cookie protection flags may be incomplete", "medium", "web-security", f"{len(incomplete_cookies)} Set-Cookie header(s) did not include both Secure and HttpOnly tokens.", "For session cookies, set Secure, HttpOnly, and an appropriate SameSite attribute. Review application-specific exceptions."))
+        cookie_attributes = [_cookie_attributes(value) for value in cookie_headers]
+        missing_secure = sum("secure" not in attributes for attributes in cookie_attributes)
+        missing_httponly = sum("httponly" not in attributes for attributes in cookie_attributes)
+        missing_samesite = sum("samesite" not in attributes for attributes in cookie_attributes)
+        if missing_secure or missing_httponly or missing_samesite:
+            missing_flags = []
+            if missing_secure:
+                missing_flags.append(f"{missing_secure} Set-Cookie header(s) missing Secure")
+            if missing_httponly:
+                missing_flags.append(f"{missing_httponly} Set-Cookie header(s) missing HttpOnly")
+            if missing_samesite:
+                missing_flags.append(f"{missing_samesite} Set-Cookie header(s) missing SameSite")
+            severity = "medium" if missing_secure or missing_httponly else "low"
+            findings.append(_finding(
+                f"http-{port}-cookie-flags",
+                "Cookie protection attributes may be incomplete",
+                severity,
+                "web-security",
+                f"{'; '.join(missing_flags)}. Cookie purpose was not determined.",
+                "Review each cookie's purpose. Session cookies generally need Secure, HttpOnly, and an appropriate SameSite value; assess exceptions in application context.",
+                "medium",
+            ))
 
         waf_markers = ("cf-ray", "x-sucuri-id", "x-amzn-waf", "x-akamai", "x-cdn")
         has_edge_signal = any(marker in headers for marker in waf_markers) or "cloudflare" in headers.get("server", "").lower()

@@ -1,16 +1,14 @@
-# Aegis Guard
+# Aegis Guard 0.4.0
 
-A local-first security posture scanner for a **single host you own or are authorized to assess**. It provides a command-line scanner and a local web dashboard.
+Aegis Guard is a local-first, low-impact security posture scanner for a single host you own or are explicitly authorized to assess. It includes a command-line interface and a local web dashboard.
 
-The dashboard is served on your computer at `127.0.0.1`. This repository is not a hosted scanner, and GitHub Pages cannot run the Python backend.
+This is a bounded exposure and configuration check, not a penetration test, vulnerability scanner, compliance certification, or proof that a system is secure. It does not exploit vulnerabilities, authenticate to targets, brute-force credentials, submit application payloads, or generate traffic load.
 
 ## Requirements
 
 - Python 3.10 or later
 
 ## Install and start the dashboard
-
-Clone the repository, install the package, and start the local server:
 
 ```sh
 git clone https://github.com/vrkreddy93-ai/legal-networ.git
@@ -19,37 +17,52 @@ python -m pip install -e .
 python -m aegis serve
 ```
 
-Open [http://127.0.0.1:8765](http://127.0.0.1:8765) if the dashboard does not open automatically. The server is intended for one local operator and binds to loopback; it is not designed to be exposed to the public internet.
+The dashboard opens at [http://127.0.0.1:8765](http://127.0.0.1:8765). It binds to loopback for one local operator and is not designed to be exposed to the public internet. GitHub Pages cannot run this Python backend.
 
-To run the Windows desktop launcher instead, use:
+On Windows, you can launch the desktop interface with:
 
 ```powershell
 python "Aegis Guard.pyw"
 ```
 
-## Command-line scan
+## Run a scan
 
-Only scan hosts you own or have explicit permission to assess. The authorization flag is required:
+The tool requires an explicit authorization declaration. Only scan a target that you own or have written permission to assess.
 
 ```sh
 python -m aegis scan --target https://your-authorized-host.example --authorized
 ```
 
-Use `--dry-run` to preview the bounded checks without sending network traffic:
+Preview the selected scope without sending network traffic:
 
 ```sh
 python -m aegis scan --target app.example --authorized --dry-run
 ```
 
-Reports are written to the local `reports/` folder by default. Use `python -m aegis --help` for available commands and options.
+Reports are written to the local `reports/` directory by default. Use `python -m aegis --help` to see all options.
 
-## Checks and limits
+For stricter dashboard scope, set an exact hostname or IP allowlist before starting the server:
 
-Aegis Guard performs bounded DNS resolution, TCP connection checks, TLS verification, and HTTP response-header review, then summarizes observations using local rules. It does not exploit vulnerabilities, authenticate to a target, brute-force credentials, send application payloads, or generate traffic load.
+```powershell
+$env:AEGIS_ALLOWED_TARGETS = "app.example,203.0.113.7"
+python -m aegis serve
+```
 
-Targets must be a single hostname or IP address. Ranges, wildcards, and CIDRs are not accepted. TCP checks are bounded, and the HTTP check makes at most one `HEAD /` request without following redirects. The dashboard previews the plan before a scan is started. Use the tool only within an explicitly authorized scope.
+Allowlist entries are exact hostnames or IP addresses; wildcards and CIDR ranges are not accepted.
 
-## Development
+## What it checks
+
+- DNS resolution for the selected host
+- One bounded TCP connection attempt per selected port
+- TLS verification on observed HTTPS ports (and an explicitly supplied HTTPS port)
+- At most one HTTP `HEAD /` request for header review
+- Local rule based summaries and JSON or Markdown reports
+
+The scanner pins checks to the first address returned by DNS and records the resolved addresses in the report. Other addresses for the same hostname are not checked in that run. Service names are inferred from port numbers; the tool does not verify service identity or authentication controls. HTTP findings reflect one root-path `HEAD` response and may differ across paths, methods, or user sessions.
+
+The 0–100 score is a local heuristic used to prioritize observations. It is not CVSS, probability, exploitability, or a security grade. Review the evidence and confidence for each finding, then confirm important results with an appropriate assessment method.
+
+## Tests
 
 Run the included unit tests with:
 
@@ -57,4 +70,4 @@ Run the included unit tests with:
 python -m unittest discover -s tests -v
 ```
 
-The [Aegis Guard introduction presentation](Aegis%20Guard%20Intro.pptx) is also included.
+The [Aegis Guard intro presentation](Aegis%20Guard%20Intro.pptx) is included in the repository.

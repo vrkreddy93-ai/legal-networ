@@ -24,6 +24,10 @@ def build_report(result: ScanResult, authorization_reference: str | None) -> dic
             "This report records low-impact observations, not proof that a system is secure or vulnerable.",
             "No exploit, credential, load, or vulnerability-database checks were performed.",
             "DDoS posture is not verified by traffic generation.",
+            "Only the first resolved address was checked; other addresses for the hostname may have different exposure.",
+            "Service names are inferred from port numbers; service identity and access controls were not verified.",
+            "HTTP findings reflect at most one HEAD request to the root path and may differ on other routes or methods.",
+            "The 0–100 priority score is a local heuristic, not CVSS, exploitability, likelihood, or a security grade.",
         ],
     }
 
@@ -35,19 +39,46 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- **Target:** `{report['scope']['single_target']}`",
         f"- **Generated (UTC):** {report['generated_at']}",
         f"- **Authorization reference:** {report['authorization']['reference']}",
-        f"- **Risk score:** {report['risk_score']}/100", "",
-        "## Observed exposure", "",
+        f"- **Heuristic priority score:** {report['risk_score']}/100", "",
+        "The score is a local prioritization aid, not CVSS, likelihood, or proof of security.", "",
+        "## Scope and observations", "",
     ]
+    if scan.get("resolved_addresses"):
+        lines.append(f"- **Resolved addresses:** {', '.join(f'`{address}`' for address in scan['resolved_addresses'])}")
+        lines.append(f"- **Address checked:** `{scan['resolved_addresses'][0]}`")
+    if scan.get("notes"):
+        lines.extend(["", *(f"- {note}" for note in scan["notes"])])
+    lines.extend(["", "## TCP exposure", ""])
     if scan["open_ports"]:
         lines.extend(["| Port | Service | State |", "| --- | --- | --- |"])
         lines.extend(f"| {item['port']} | {item['service']} | {item['state']} |" for item in scan["open_ports"])
     else:
         lines.append("No selected TCP port accepted a connection.")
+    lines.extend(["", "## TLS observations", ""])
+    if scan.get("tls"):
+        for item in scan["tls"]:
+            status = "verified" if item.get("verified") else "not verified"
+            details = f"; protocol {item['protocol']}" if item.get("protocol") else ""
+            if item.get("days_until_expiry") is not None:
+                details += f"; certificate expires in {item['days_until_expiry']} day(s)"
+            if item.get("error"):
+                details += f"; {item['error']}"
+            lines.append(f"- Port {item['port']}: {status}{details}.")
+    else:
+        lines.append("No TLS handshake was attempted on the selected target and observed ports.")
+    lines.extend(["", "## HTTP observations", ""])
+    if scan.get("http"):
+        for item in scan["http"]:
+            status = f"HTTP {item['status']}" if item.get("status") is not None else "unreachable"
+            lines.append(f"- {item.get('scheme', 'HTTP').upper()} port {item['port']}: {status}.")
+    else:
+        lines.append("No HTTP HEAD request was made.")
     lines.extend(["", "## Findings", ""])
     if report["findings"]:
         for finding in report["findings"]:
             lines.extend([
                 f"### {finding['severity'].upper()} — {finding['title']}", "",
+                f"**Category / confidence:** {finding['category']} / {finding.get('confidence', 'unspecified')}", "",
                 f"**Evidence:** {finding['evidence']}", "",
                 f"**Recommendation:** {finding['recommendation']}", "",
             ])

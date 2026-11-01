@@ -8,8 +8,9 @@ class AnalysisTests(unittest.TestCase):
     def test_exposed_redis_is_critical(self):
         result = ScanResult(target=Target("example.com"), open_ports=[{"port": 6379, "service": "redis", "state": "open"}])
         findings = analyze(result)
-        self.assertEqual(findings[0].severity, "critical")
-        self.assertGreaterEqual(risk_score(findings), 35)
+        self.assertEqual(findings[0].severity, "high")
+        self.assertEqual(findings[0].confidence, "medium")
+        self.assertGreaterEqual(risk_score(findings), 20)
 
     def test_single_http_response_yields_ddos_posture_guidance(self):
         result = ScanResult(target=Target("example.com"), http=[{"scheme": "https", "port": 443, "reachable": True, "status": 200, "headers": {}}])

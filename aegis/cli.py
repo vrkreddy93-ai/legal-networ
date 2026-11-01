@@ -140,7 +140,7 @@ def _run_scan(
     written = write_reports(report, args.output, args.format)
     if on_report:
         on_report(report)
-    print(f"Completed safe posture checks. Risk score: {risk_score(result.findings)}/100.")
+    print(f"Completed low-impact posture checks. Heuristic priority score: {risk_score(result.findings)}/100 (not a probability or vulnerability count).")
     print("Report written to: " + ", ".join(str(path) for path in written))
     return 0
 

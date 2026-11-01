@@ -48,11 +48,12 @@ def parse_target(value: str) -> Target:
 
     try:
         address = ipaddress.ip_address(host)
-        if address.is_unspecified or address.is_multicast or address.is_link_local:
-            raise TargetValidationError("Unspecified, multicast, and link-local addresses are not valid scan targets.")
     except ValueError:
         if not _HOSTNAME.fullmatch(host):
             raise TargetValidationError("Target must be a valid hostname, IPv4 address, or IPv6 address.")
+    else:
+        if address.is_unspecified or address.is_multicast or address.is_link_local:
+            raise TargetValidationError("Unspecified, multicast, and link-local addresses are not valid scan targets.")
 
     return Target(host=host.lower(), port=port, scheme=scheme)
 
